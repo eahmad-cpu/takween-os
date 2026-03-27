@@ -326,7 +326,17 @@ export default function Home() {
           </div>
 
           <div className="space-y-1">
-            <div className="text-sm font-bold">الرؤية</div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-sm font-bold">الرؤية</div>
+
+              <Link
+                href="/vision"
+                className="text-sm text-primary underline-offset-4 hover:underline"
+              >
+                تنفيذ الرؤية
+              </Link>
+            </div>
+
             <Textarea
               value={vision}
               onChange={(e) => setVision(e.target.value)}
@@ -499,7 +509,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* <div className="rounded-lg border bg-card p-4 space-y-3">
+      <div className="rounded-lg border bg-card p-4 space-y-3">
         <div className="text-sm font-bold">روتيناتي</div>
 
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -524,7 +534,7 @@ export default function Home() {
             </div>
           )}
         </div>
-      </div> */}
+      </div>
     </div>
   );
 }
