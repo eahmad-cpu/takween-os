@@ -6,10 +6,11 @@ import { SheetClose } from "@/components/ui/sheet";
 
 const LINKS = [
   { href: "/", label: "الرئيسية" },
+  { href: "/vision", label: "تنفيذ الرؤية" },
   { href: "/weekly", label: "أسبوعي" },
   { href: "/ibadah", label: "الشريعة والإصلاح" },
   { href: "/aspects", label: "بقية الجوانب" },
-  // { href: "/years", label: "السنوات" },
+
   { href: "/settings", label: "الإعدادات" },
 ];
 

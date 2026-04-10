@@ -20,7 +20,8 @@ type BlockType =
   | "project"
   | "notes"
   | "habit"
-  | "routine";
+  | "routine"
+  | "youtube_channel";
 
 const LABELS: Record<BlockType, string> = {
   checklist: "Checklist",
@@ -31,6 +32,7 @@ const LABELS: Record<BlockType, string> = {
   notes: "ملاحظات",
   habit: "عادة (Habit)",
   routine: "روتين (جلسات)",
+  youtube_channel: "قناة YouTube",
 };
 
 export function AddBlockInline({

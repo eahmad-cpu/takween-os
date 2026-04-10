@@ -24,30 +24,43 @@ export async function startNewPlaylistRun(tenantId: string, blockId: string) {
     nodesRef,
     where("parentId", "==", blockId),
     where("type", "==", "item"),
-    where("archived", "==", false)
+    where("archived", "==", false),
   );
 
   const snap = await getDocs(qItems);
   const docs = snap.docs;
 
+  const hasItems = docs.length > 0;
+  const allDone =
+    hasItems &&
+    docs.every((d) => {
+      const data = d.data() as { done?: boolean };
+      return data.done === true;
+    });
+
   for (const part of chunks(docs, 450)) {
     const batch = writeBatch(db);
+
     part.forEach((d) => {
       batch.update(d.ref, {
-  done: false,
-  lastOpenedAt: null,
-  updatedAt: now,
-  version: increment(1),
-});
+        done: false,
+        watchSeconds: 0,
+        watchPercent: 0,
+        completedAt: null,
+        lastOpenedAt: null,
+        updatedAt: now,
+        version: increment(1),
+      });
     });
+
     await batch.commit();
   }
 
   await updateDoc(doc(db, "tenants", tenantId, "nodes", blockId), {
-  runsCompleted: increment(1),
-  lastOpenedAt: null,
-  lastOpenedEpisodeId: null,
-  updatedAt: now,
-  version: increment(1),
-});
+    ...(allDone ? { runsCompleted: increment(1) } : {}),
+    lastOpenedAt: null,
+    lastOpenedEpisodeId: null,
+    updatedAt: now,
+    version: increment(1),
+  });
 }

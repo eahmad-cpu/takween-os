@@ -308,9 +308,7 @@ export default function VisionPage() {
       <div className="rounded-lg border bg-card p-4 space-y-2">
         <h1 className="text-2xl font-bold">تنفيذ الرؤية</h1>
         <p className="text-sm text-muted-foreground leading-7">
-          هنا تتحول الرؤية إلى ممارسة عملية. المهام اليومية تُنجز يوميًا، واللوب
-          المتوالي يعمل الجمعة والسبت والإجازات، ويمكنك إنجاز أكثر من مهمة في
-          نفس اليوم.
+          هنا تتحول الرؤية إلى ممارسة عملية
         </p>
       </div>
 

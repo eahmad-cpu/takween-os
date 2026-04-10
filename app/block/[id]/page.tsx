@@ -2,40 +2,39 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+
+import { Breadcrumbs } from "@/components/breadcrumbs";
+import { Button } from "@/components/ui/button";
+
 import { ChecklistBlock } from "@/components/blocks/checklist-block";
 import { PlaylistBlock } from "@/components/blocks/playlist-block";
-
 import { ProjectBlock } from "@/components/blocks/project-block";
-
 import { RoadmapBlock } from "@/components/blocks/roadmap-block";
 import { NotesBlock } from "@/components/blocks/notes-block";
-import { renameNodeTitle } from "@/lib/node-actions";
-import { Breadcrumbs } from "@/components/breadcrumbs";
-
 import { CounterBlock } from "@/components/blocks/counter-block";
-
 import { HabitBlock } from "@/components/blocks/habit-block";
-
 import { RoutineBlock } from "@/components/blocks/routine-block";
+import { YoutubeChannelBlock } from "@/components/blocks/youtube-channel-block";
+import { YoutubePlaylistBlock } from "@/components/blocks/youtube-playlist-block";
 
-import { useRouter } from "next/navigation";
+import { renameNodeTitle } from "@/lib/node-actions";
 import { archiveSubtree } from "@/lib/archive-subtree";
-import { Button } from "@/components/ui/button";
 
 export default function BlockPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
 
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
   const [blockType, setBlockType] = useState<string>("");
+  const [sourceType, setSourceType] = useState<string>("");
 
   const [editing, setEditing] = useState(false);
   const [draftTitle, setDraftTitle] = useState("");
 
-  const router = useRouter();
   const [parentId, setParentId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -54,23 +53,29 @@ export default function BlockPage() {
       if (!snap.exists()) {
         setTitle("Block غير موجود");
         setBlockType("");
+        setSourceType("");
         setLoading(false);
         return;
       }
 
       const data = snap.data() as any;
+
       setParentId(data.parentId ?? null);
       setTitle(data.title ?? "");
       setDraftTitle((prev) => (prev ? prev : (data.title ?? "")));
       setBlockType(data.blockType ?? "");
+      setSourceType(data.sourceType ?? "");
       setLoading(false);
     });
   }, [id]);
 
-  if (!auth.currentUser)
+  if (!auth.currentUser) {
     return <div className="text-muted-foreground">سجّل الدخول.</div>;
-  if (loading)
+  }
+
+  if (loading) {
     return <div className="text-muted-foreground">جارٍ التحميل...</div>;
+  }
 
   const tenantId = auth.currentUser.uid;
 
@@ -78,6 +83,7 @@ export default function BlockPage() {
     <div className="space-y-4">
       <div>
         <Breadcrumbs tenantId={tenantId} nodeId={id} />
+
         <div className="flex items-center justify-between gap-2">
           {!editing ? (
             <h1 className="text-2xl font-bold">{title}</h1>
@@ -94,19 +100,24 @@ export default function BlockPage() {
               variant="outline"
               onClick={async () => {
                 if (!auth.currentUser) return;
+
                 const ok = window.confirm(
                   "حذف هذا البلوك؟ (سيتم أرشفة كل ما تحته)",
                 );
                 if (!ok) return;
 
                 await archiveSubtree(auth.currentUser.uid, String(id));
-                if (parentId)
-                  router.push(`/card/${parentId}`); // لو كان parent stage هنعدلها بعدين
-                else router.push("/explorer");
+
+                if (parentId) {
+                  router.push(`/card/${parentId}`);
+                } else {
+                  router.push("/explorer");
+                }
               }}
             >
               حذف البلوك
             </Button>
+
             {!editing ? (
               <button
                 className="rounded-md border px-3 py-2 text-sm"
@@ -124,11 +135,14 @@ export default function BlockPage() {
                       nodeId: id,
                       title: draftTitle,
                     });
+
+                    setTitle(draftTitle.trim() || title);
                     setEditing(false);
                   }}
                 >
                   حفظ
                 </button>
+
                 <button
                   className="rounded-md border px-3 py-2 text-sm"
                   onClick={() => {
@@ -142,10 +156,18 @@ export default function BlockPage() {
             )}
           </div>
         </div>
-        <p className="text-muted-foreground">{blockType || "block"}</p>
+
+        <p className="text-muted-foreground">
+          {blockType || "block"}
+          {sourceType ? ` • ${sourceType}` : ""}
+        </p>
       </div>
 
-      {blockType === "roadmap" ? (
+      {blockType === "youtube_channel" ? (
+        <YoutubeChannelBlock tenantId={tenantId} blockId={id} />
+      ) : blockType === "playlist" && sourceType === "youtube" ? (
+        <YoutubePlaylistBlock tenantId={tenantId} blockId={id} />
+      ) : blockType === "roadmap" ? (
         <RoadmapBlock tenantId={tenantId} blockId={id} />
       ) : blockType === "playlist" ? (
         <PlaylistBlock tenantId={tenantId} blockId={id} />
