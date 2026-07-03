@@ -325,7 +325,7 @@ export default function BlockPage() {
   return (
     <div className="space-y-4">
       <div>
-        <Breadcrumbs tenantId={tenantId} nodeId={id} />
+        {/* <Breadcrumbs tenantId={tenantId} nodeId={id} /> */}
 
         <div className="flex items-center justify-between gap-2">
           {!editing ? (

@@ -162,7 +162,7 @@ export default function StagePage() {
 
   return (
     <div className="space-y-4">
-      <Breadcrumbs tenantId={tenantId} nodeId={id} />
+      {/* <Breadcrumbs tenantId={tenantId} nodeId={id} /> */}
 
       <div className="space-y-2">
         <h1 className="text-2xl font-bold">{stageTitle}</h1>

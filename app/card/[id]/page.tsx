@@ -97,7 +97,7 @@ export default function CardPage() {
   if (id === "ib_card_mind_tadabbur") {
     return (
       <div className="space-y-4">
-        <Breadcrumbs tenantId={tenantId} nodeId={id} />
+        {/* <Breadcrumbs tenantId={tenantId} nodeId={id} /> */}
         <h1 className="text-2xl font-bold">{cardTitle}</h1>
         <TadabburQuranReview tenantId={tenantId} />
       </div>
@@ -107,7 +107,7 @@ export default function CardPage() {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Breadcrumbs tenantId={tenantId} nodeId={id} />
+        {/* <Breadcrumbs tenantId={tenantId} nodeId={id} /> */}
         <h1 className="text-2xl font-bold">{cardTitle}</h1>
         {String(id).startsWith("year_") && (
           <YearCalendar
