@@ -72,7 +72,8 @@ export default function LoginClient() {
           <Button className="w-full" onClick={loginGoogle} disabled={loading}>
             دخول Google
           </Button>
-
+          
+{/* 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t" />
@@ -113,7 +114,7 @@ export default function LoginClient() {
                 autoComplete="current-password"
                 required
               />
-            </div>
+            </div> */}
 
             {err ? (
               <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm">
@@ -125,7 +126,7 @@ export default function LoginClient() {
               {loading ? "جاري الدخول..." : "دخول"}
             </Button>
 
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
+            {/* <div className="flex items-center justify-between text-sm text-muted-foreground">
               <Link className="underline" href="/reset-password">
                 نسيت كلمة المرور؟
               </Link>
@@ -133,7 +134,11 @@ export default function LoginClient() {
                 حساب جديد
               </Link>
             </div>
+           
           </form>
+          
+  */}
+          
         </CardContent>
       </Card>
     </div>
