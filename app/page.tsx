@@ -23,8 +23,6 @@ import { getBlockTypeLabel } from "@/lib/block-type-labels";
 import { BlockTypeFilter } from "@/components/home/block-type-filter";
 import { PencilIcon, SaveIcon, TrashIcon } from "lucide-react";
 
-
-
 function computeAgeYMD(birth: Date, now: Date) {
   let y = now.getFullYear() - birth.getFullYear();
   let m = now.getMonth() - birth.getMonth();
@@ -91,8 +89,6 @@ export default function Home() {
   const [focusSaving, setFocusSaving] = useState(false);
   const [focusError, setFocusError] = useState("");
 
-  
-
   useEffect(() => {
     return auth.onAuthStateChanged(async (u) => {
       if (!u) {
@@ -126,8 +122,20 @@ export default function Home() {
     });
   }, []);
 
- 
-  
+ const today = useMemo(() => {
+    const parts = new Intl.DateTimeFormat("ar-EG-u-nu-latn", {
+      weekday: "long",
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+    }).formatToParts(new Date());
+    const get = (type: Intl.DateTimeFormatPartTypes) =>
+      parts.find((part) => part.type === type)?.value ?? "";
+    return {
+      weekday: get("weekday"),
+      date: `${get("day")} / ${get("month")} / ${get("year")}`,
+    };
+  }, []);
 
   const computed = useMemo(() => {
     if (!birthDate) return null;
@@ -200,300 +208,327 @@ export default function Home() {
     }
   }
 
+ 
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="space-y-1">
-        <h1 className="brand-heading text-2xl font-extrabold">
-          مرحبًا، {name}
-        </h1>
-        {computed && (
-          <div className="text-sm text-muted-foreground">
-            عمرك الآن: {computed.age.years} سنة، {computed.age.months} شهر،{" "}
-            {computed.age.days} يوم
-          </div>
-        )}
-      </div>
-
-      {/* Birthdate */}
-      <div className="brand-card rounded-2xl p-4 space-y-2">
-        <div className="text-sm font-bold">تاريخ الميلاد</div>
-
-        {birthDate && !editBirth ? (
-          <div className="flex items-center gap-3">
-            <div className="text-sm text-muted-foreground">{birthDate}</div>
-            <Button
-              variant="outline"
-              className="brand-outline-button pressable"
-              onClick={() => setEditBirth(true)}
-            >
-             <PencilIcon className="w-4 h-4" />
-            </Button>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <Input
-              type="date"
-              value={birthDate}
-              onChange={(e) => setBirthDate(e.target.value)}
-              className="w-56"
-            />
-            <Button
-              variant="outline"
-              className="brand-primary-button pressable"
-              disabled={savingBirth || !birthDate || !uid}
-              onClick={async () => {
-                if (!uid || !birthDate) return;
-                setSavingBirth(true);
-                await saveBirthDate(uid, birthDate);
-                setSavingBirth(false);
-                setEditBirth(false);
-              }}
-            >
-              {savingBirth ? "..." : <SaveIcon className="w-4 h-4" />}
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {/* Compass */}
-      <div className="brand-card rounded-2xl p-4 space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="text-sm font-bold">
-            البوصلة (الرسالة / الرؤية / القيم)
-          </div>
-          <Button
-            variant="outline"
-            className="brand-primary-button touch-manipulation active:scale-[0.97] active:brightness-95"
-            disabled={savingCompass || !uid}
-            onClick={async () => {
-              if (!uid) return;
-
-              const hasAny = mission.trim() || vision.trim() || values.trim();
-              if (!hasAny) {
-                setCompassError(
-                  "اكتب شيئًا في الرسالة أو الرؤية أو القيم قبل الحفظ.",
-                );
-                return;
-              }
-
-              setCompassError("");
-              setSavingCompass(true);
-              try {
-                await saveCompass(uid, { mission, vision, values });
-              } finally {
-                setSavingCompass(false);
-              }
-            }}
-          >
-            {savingCompass ? "..." : <SaveIcon className="w-4 h-4" />}
-          </Button>
-        </div>
-
-        {compassError && (
-          <div className="text-sm text-red-500">{compassError}</div>
-        )}
-
-        <div className="space-y-3">
-          <div className="space-y-1">
-            <div className="text-sm font-bold">الرسالة</div>
-            <Textarea
-              value={mission}
-              onChange={(e) => setMission(e.target.value)}
-              className="min-h-35"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <div className="flex items-center justify-between gap-3">
-              <div className="text-sm font-bold">الرؤية</div>
-
-              <Link
-                href="/vision"
-                className="brand-chip pressable rounded-full px-3 py-2 text-sm"
-              >
-                تنفيذ الرؤية
-              </Link>
+    <main dir="rtl" className="mx-auto max-w-6xl space-y-6">
+      <div className="space-y-6">
+        {/* Header */}
+        <header className="space-y-1">
+          <h1 className="brand-heading text-2xl font-extrabold">
+            مرحبًا، {name}
+          </h1>
+          {computed && (
+            <div className="text-sm text-muted-foreground">
+              عمرك الآن: {computed.age.years} سنة، {computed.age.months} شهر،{" "}
+              {computed.age.days} يوم
             </div>
+          )}
+        </header>
 
-            <Textarea
-              value={vision}
-              onChange={(e) => setVision(e.target.value)}
-              className="min-h-35"
-            />
-          </div>
+        {/* Birthdate */}
+        <div className="brand-card rounded-2xl p-4 space-y-2">
+          <div className="text-sm font-bold">تاريخ الميلاد</div>
 
-          <div className="space-y-1">
-            <div className="text-sm font-bold">القيم</div>
-            <Textarea
-              value={values}
-              onChange={(e) => setValues(e.target.value)}
-              className="min-h-35"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Years */}
-      <div className="space-y-3">
-        <div className="text-sm font-bold">السنوات (إلى 90 سنة)</div>
-
-        {!computed ? (
-          <div className="text-muted-foreground">
-            أدخل تاريخ الميلاد لعرض السنوات.
-          </div>
-        ) : (
-          <>
-            <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">
-                السنوات السابقة
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {computed.past.map((y) => (
-                  <button
-                    key={y}
-                    className="brand-chip pressable h-10 w-10 rounded-full text-xs font-bold"
-                    onClick={() => openYear(y)}
-                  >
-                    {y}
-                  </button>
-                ))}
-                {computed.past.length === 0 && (
-                  <div className="text-muted-foreground">—</div>
-                )}
-              </div>
-            </div>
-
-            {/* Current big (real current year) */}
-            <button
-              className="brand-card brand-card-hover pressable w-full rounded-2xl p-6 text-center"
-              onClick={() => openYear(computed.currentYear)}
-            >
-              <div className="text-sm text-muted-foreground">السنة الحالية</div>
-              <div className="text-4xl font-extrabold">
-                {computed.currentYear}
-              </div>
-            </button>
-
-            {/* Future (wrap, no box, show all) */}
-            <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">
-                السنوات القادمة
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {computed.future.map((y) => (
-                  <button
-                    key={y}
-                    className="brand-chip pressable h-10 w-10 rounded-full text-sm font-bold"
-                    onClick={() => openYear(y)}
-                  >
-                    {y}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
-      <div className="brand-card rounded-2xl p-4 space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="text-sm font-bold">التركيز الحالي</div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              className="brand-primary-button pressable"
-              disabled={focusSaving}
-              onClick={saveFocus}
-            >
-              {focusSaving ? "..." : <SaveIcon className="w-4 h-4" />}
-            </Button>
-            <Button
-              variant="outline"
-              className="brand-danger-button pressable"
-              onClick={async () => {
-                if (!uid) return;
-                await clearFocusCurrent(uid);
-                setFocusTitle("");
-                setFocusDesc("");
-                setFocusSelected([]);
-              }}
-            >
-              <TrashIcon className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-
-        {focusError && <div className="text-sm text-red-500">{focusError}</div>}
-
-        <div className="space-y-2">
-          <div className="text-sm font-bold">عنوان الفترة</div>
-          <Input
-            value={focusTitle}
-            onChange={(e) => setFocusTitle(e.target.value)}
-            placeholder="مثال: رمضان 2026"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <div className="text-sm font-bold">وصف</div>
-          <Textarea
-            value={focusDesc}
-            onChange={(e) => setFocusDesc(e.target.value)}
-            className="min-h-30"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <div className="text-sm font-bold">الأولويات</div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          {birthDate && !editBirth ? (
+            <div className="flex items-center gap-3">
+              <div className="text-sm text-muted-foreground">{birthDate}</div>
               <Button
                 variant="outline"
-                className="brand-outline-button pressable w-full justify-between"
+                className="brand-outline-button pressable"
+                onClick={() => setEditBirth(true)}
               >
-                {focusSelected.length
-                  ? `مختار: ${focusSelected.length}`
-                  : "اختر الأولويات"}
-                <span className="text-muted-foreground">▾</span>
+                <PencilIcon className="w-4 h-4" />
               </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] max-h-80 overflow-auto">
-              {PRIORITIES.map((p) => {
-                const checked = focusSelected.some((x) => x.id === p.id);
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={p.id}
-                    checked={checked}
-                    onCheckedChange={() => togglePriority(p)}
-                    onSelect={(e) => e.preventDefault()}
-                  >
-                    {p.label}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {focusSelected.length > 0 && (
-            <div className="pt-2 flex flex-wrap gap-2">
-              {focusSelected.map((p) => (
-                <Link
-                  key={p.id}
-                  href={`/card/${p.id}`}
-                  className="brand-chip pressable rounded-full px-3 py-2 text-sm"
-                >
-                  اذهب إلى: {p.label}
-                </Link>
-              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Input
+                type="date"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                className="w-56"
+              />
+              <Button
+                variant="outline"
+                className="brand-primary-button pressable"
+                disabled={savingBirth || !birthDate || !uid}
+                onClick={async () => {
+                  if (!uid || !birthDate) return;
+                  setSavingBirth(true);
+                  await saveBirthDate(uid, birthDate);
+                  setSavingBirth(false);
+                  setEditBirth(false);
+                }}
+              >
+                {savingBirth ? "..." : <SaveIcon className="w-4 h-4" />}
+              </Button>
             </div>
           )}
         </div>
-      </div>
 
-      <BlockTypeFilter tenantId={uid} />
-    </div>
+        <div className="brand-card rounded-2xl p-4 space-y-2">
+          <p className="text-4xl font-black tracking-tight sm:text-5xl">
+            {today.weekday}
+          </p>
+          <p
+            className="mt-1 text-3xl font-bold text-primary sm:text-4xl"
+            
+          >
+            {today.date}
+          </p>
+
+          <Link
+            href="/elastic-habits"
+            className="brand-chip pressable rounded-full px-3 py-2 text-sm"
+          >
+            ابدأ يومك مع العادات المطاطية
+          </Link>
+        </div>
+
+        {/* Compass */}
+        <div className="brand-card rounded-2xl p-4 space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-sm font-bold">
+              البوصلة (الرسالة / الرؤية / القيم)
+            </div>
+            <Button
+              variant="outline"
+              className="brand-primary-button touch-manipulation active:scale-[0.97] active:brightness-95"
+              disabled={savingCompass || !uid}
+              onClick={async () => {
+                if (!uid) return;
+
+                const hasAny = mission.trim() || vision.trim() || values.trim();
+                if (!hasAny) {
+                  setCompassError(
+                    "اكتب شيئًا في الرسالة أو الرؤية أو القيم قبل الحفظ.",
+                  );
+                  return;
+                }
+
+                setCompassError("");
+                setSavingCompass(true);
+                try {
+                  await saveCompass(uid, { mission, vision, values });
+                } finally {
+                  setSavingCompass(false);
+                }
+              }}
+            >
+              {savingCompass ? "..." : <SaveIcon className="w-4 h-4" />}
+            </Button>
+          </div>
+
+          {compassError && (
+            <div className="text-sm text-red-500">{compassError}</div>
+          )}
+
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <div className="text-sm font-bold">الرسالة</div>
+              <Textarea
+                value={mission}
+                onChange={(e) => setMission(e.target.value)}
+                className="min-h-35"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-sm font-bold">الرؤية</div>
+
+                <Link
+                  href="/vision"
+                  className="brand-chip pressable rounded-full px-3 py-2 text-sm"
+                >
+                  تنفيذ الرؤية
+                </Link>
+              </div>
+
+              <Textarea
+                value={vision}
+                onChange={(e) => setVision(e.target.value)}
+                className="min-h-35"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <div className="text-sm font-bold">القيم</div>
+              <Textarea
+                value={values}
+                onChange={(e) => setValues(e.target.value)}
+                className="min-h-35"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Years */}
+        <div className="space-y-3">
+          <div className="text-sm font-bold">السنوات (إلى 90 سنة)</div>
+
+          {!computed ? (
+            <div className="text-muted-foreground">
+              أدخل تاريخ الميلاد لعرض السنوات.
+            </div>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">
+                  السنوات السابقة
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {computed.past.map((y) => (
+                    <button
+                      key={y}
+                      className="brand-chip pressable h-10 w-10 rounded-full text-xs font-bold"
+                      onClick={() => openYear(y)}
+                    >
+                      {y}
+                    </button>
+                  ))}
+                  {computed.past.length === 0 && (
+                    <div className="text-muted-foreground">—</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Current big (real current year) */}
+              <button
+                className="brand-card brand-card-hover pressable w-full rounded-2xl p-6 text-center"
+                onClick={() => openYear(computed.currentYear)}
+              >
+                <div className="text-sm text-muted-foreground">
+                  السنة الحالية
+                </div>
+                <div className="text-4xl font-extrabold">
+                  {computed.currentYear}
+                </div>
+              </button>
+
+              {/* Future (wrap, no box, show all) */}
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">
+                  السنوات القادمة
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {computed.future.map((y) => (
+                    <button
+                      key={y}
+                      className="brand-chip pressable h-10 w-10 rounded-full text-sm font-bold"
+                      onClick={() => openYear(y)}
+                    >
+                      {y}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="brand-card rounded-2xl p-4 space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-sm font-bold">التركيز الحالي</div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                className="brand-primary-button pressable"
+                disabled={focusSaving}
+                onClick={saveFocus}
+              >
+                {focusSaving ? "..." : <SaveIcon className="w-4 h-4" />}
+              </Button>
+              <Button
+                variant="outline"
+                className="brand-danger-button pressable"
+                onClick={async () => {
+                  if (!uid) return;
+                  await clearFocusCurrent(uid);
+                  setFocusTitle("");
+                  setFocusDesc("");
+                  setFocusSelected([]);
+                }}
+              >
+                <TrashIcon className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {focusError && (
+            <div className="text-sm text-red-500">{focusError}</div>
+          )}
+
+          <div className="space-y-2">
+            <div className="text-sm font-bold">عنوان الفترة</div>
+            <Input
+              value={focusTitle}
+              onChange={(e) => setFocusTitle(e.target.value)}
+              placeholder="مثال: رمضان 2026"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="text-sm font-bold">وصف</div>
+            <Textarea
+              value={focusDesc}
+              onChange={(e) => setFocusDesc(e.target.value)}
+              className="min-h-30"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="text-sm font-bold">الأولويات</div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="brand-outline-button pressable w-full justify-between"
+                >
+                  {focusSelected.length
+                    ? `مختار: ${focusSelected.length}`
+                    : "اختر الأولويات"}
+                  <span className="text-muted-foreground">▾</span>
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] max-h-80 overflow-auto">
+                {PRIORITIES.map((p) => {
+                  const checked = focusSelected.some((x) => x.id === p.id);
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={p.id}
+                      checked={checked}
+                      onCheckedChange={() => togglePriority(p)}
+                      onSelect={(e) => e.preventDefault()}
+                    >
+                      {p.label}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {focusSelected.length > 0 && (
+              <div className="pt-2 flex flex-wrap gap-2">
+                {focusSelected.map((p) => (
+                  <Link
+                    key={p.id}
+                    href={`/card/${p.id}`}
+                    className="brand-chip pressable rounded-full px-3 py-2 text-sm"
+                  >
+                    اذهب إلى: {p.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <BlockTypeFilter tenantId={uid} />
+      </div>
+    </main>
   );
 }

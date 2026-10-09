@@ -101,6 +101,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { auth, db } from "@/lib/firebase";
 import { ensureAspectsTemplate } from "@/lib/templates/aspects";
+import { Button } from "@/components/ui/button";
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 
 type NodeRow = {
@@ -175,6 +176,10 @@ export default function AspectsPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">بقية الجوانب</h1>
+
+      <Button asChild variant="outline">
+        <Link href="/aspects-review">تقييم الجوانب</Link>
+      </Button>
 
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((c) => (
