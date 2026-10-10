@@ -366,17 +366,18 @@ export default function ElasticHabitsPage() {
           <p className="text-4xl font-black tracking-tight sm:text-5xl">{today.weekday}</p>
           <p className="mt-1 text-3xl font-bold text-primary sm:text-4xl" dir="ltr">{today.date}</p>
           <h1 className="mt-4 text-lg font-semibold text-muted-foreground">العادات المطاطية</h1>
+          <p className="text-sm text-muted-foreground">قم بإضافة جانب معين ثم إضافة عادات داخله</p>
         </div>
         <Button type="button" onClick={() => void addMajorGroup()} disabled={addingMajor}>
           <Plus />
-          {addingMajor ? "جارٍ الإضافة..." : "إضافة مجموعة كبرى"}
+          {addingMajor ? "جارٍ الإضافة..." : "إضافة جانب معين"}
         </Button>
       </header>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       {majorGroups.length === 0 ? (
-        <Card><CardContent className="space-y-3 pt-6"><p className="font-medium">لا توجد مجموعات بعد.</p><Button type="button" onClick={() => void addMajorGroup()} disabled={addingMajor}><Plus />إضافة مجموعة كبرى</Button></CardContent></Card>
+        <Card><CardContent className="space-y-3 pt-6"><p className="font-medium">لا توجد مجموعات بعد.</p><Button type="button" onClick={() => void addMajorGroup()} disabled={addingMajor}><Plus />إضافة جانب معين</Button></CardContent></Card>
       ) : (
         <section className="space-y-3">
           {majorGroups.map((major, majorIndex) => {
